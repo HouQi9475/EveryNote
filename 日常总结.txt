@@ -1,0 +1,108 @@
+﻿day0313
+c3p0:    1  配置datasource  ComBoPooledDataSource
+			     <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+				 <property name="jdbcUrl" value="jdbc:mysql:///mydb"></property>
+				 <property name="user" value="root"></property>
+				 <property name="password" value="1"></property>
+         2  创建jdbcTemplate对象，将datasource注入
+		 3  创建dao对象，将jdbcTemplate注入
+		 4  创建biz对象，将dao注入
+		 5  创建action对象，将biz注入，scope设置为“prototype”即多实例
+事务管理器
+          1  配置transaction    DataSourceTranscationManager
+		  2  注入datasource
+		  3  配置事务增强
+		       <tx:advice id="txAdvice" trancsaction-manager="trancsactionmanager"/>
+			      <!--做事务操作-->
+				  <tx:attrbutes>
+				      <!--配置匹配方法-->
+					  <tx:method name=""/>
+				  </tx:attrbutes>
+			   </tx>
+		  4  配置切面
+		     <aop:cofig>
+			    //配置切入点
+				<aop:pointer expression="execution(* baoming.method(..))" id="pointer"/>
+				<aop:advisor advice-ref="txAdvice" pointer="pointer"/>			
+			 </aop:cofig>
+			 
+SSH框架整合
+            1 配置struts2
+			     web.xml 中配置核心过滤器
+				      <filter>
+					     <filter-name>struts2</filter-name>
+						 <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+					  </filter>
+					  <filter-mapping>
+					     <filter-name>struts2</filter-name>
+						 <url-pattern>/*</url-pattern>
+					  </filter-mapping>
+			     struts2.xml
+				      <package name="default" namespace="/" extends="struts-default">
+							<action name="userAction" class="userAction"/>
+					  </package>
+			2 配置spring
+			     web.xml 中配置监听器和核心配置文件路径
+				 <!-- 设置spring IOC容器监听器，将web项目全部运行在该容器下 -->
+				      <listener>		
+					      <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+					  </listener>
+				 <!-- 设置spring框架核心配置文件的路径 -->	  
+				      <context-param>
+					      <param-name>contextConfigLocation</param-name>
+						  <param-value>classpath:ApplicationContext.xml</param-value>
+					  </context-param>
+				 创建ApplicationContext.xml配置文件,按照需求导入相应的约束
+				    <beans xmlns="http://www.springframework.org/schema/beans"
+						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+						xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+						xmlns:context="http://www.springframework.org/schema/context"
+						xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	                    http://www.springframework.org/schema/aop
+	                    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	                    http://www.springframework.org/schema/tx
+	                    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	                    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+						
+					</beans>	
+				在配置文件中创建c3p0连接池对象	
+                     1  配置datasource  ComBoPooledDataSource
+							 <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+							 <property name="jdbcUrl" value="jdbc:mysql:///mydb"></property>
+							 <property name="user" value="root"></property>
+							 <property name="password" value="1"></property>
+					 2  创建hibernateTemplate对象，将datasource注入
+					         <bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+							     <property name="datasource" ref=""datasource/>
+							 </bean>
+					 3  创建dao对象，将hibernateTemplate注入
+					 4  创建biz对象，将dao注入
+            3 配置hibernate
+                    创建hibernate核心配置文件
+                        hibernate.cfg.xml     注解部分在反向生成实体类时打开
+                                 <!--property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+									<property name="hibernate.connection.username">root</property>
+									<property name="hibernate.connection.password">1</property>
+									<property name="hibernate.connection.url">jdbc:mysql://127.0.0.1:3306/mydb</property> -->
+						加入方言和显示SQL
+                          <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+                          <property name="hibernate.show_sql">true</property>
+                    在spring配置文件中创建sessionFactory对象
+                        <bean id="sessionFactory"  class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+                               <!-- 注入dateSource 即c3p0连接池-->
+							   <property name="datasource" ref="datasource"/>
+							   <!-- 写入核心配置文件路径-->
+							   <property name="configLocations" value="classpath:hibernate.cfg.xml"/>
+                        </bean>		
+                    在spring配置文件中开启事务管理器
+                        <bean id="trancsactionmanager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+                             <!--注入sessionFactory-->
+							 <property name="sessionFactory" ref="sessionFactory"/>
+                        </bean>		
+                    开启事务注解扫描
+                        <tx:annotation-driver trancsaction-manager="trancsactionmanager/>
+                    事务操作：
+
+                        在需要事务操作的类(通常是service层中的类)上面加注解即可将类中的所有方法进行事务处理
+                             @Transactional						
