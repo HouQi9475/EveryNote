@@ -1,0 +1,58 @@
+0314随笔总结
+      1   HTTP协议（无状态协议）
+	      协议：  协议的甲乙双方就是  客户端(浏览器)和服务器
+		          理解成双方通信的格式	
+				  请求协议：
+				      请求头： 头名称，头值，空行，请求体
+					            //请求的主机
+					            Host: localhost:8080
+								//浏览器向服务器传递该浏览器信息
+								User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0
+								//accept浏览器可接收类型
+								Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+								//支持语言
+								Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3
+								//支持的编码     压缩格式
+								Accept-Encoding: gzip, deflate
+								Cookie: JSESSIONID=D1341BE78A39DD3BBD9C81ED937B9749
+								Connection: keep-alive
+								Upgrade-Insecure-Requests: 1
+				  响应协议：
+				     响应头：   //响应行   协议/版本  状态码  状态码的解析  400客户端错误  500服务器错误
+								Http/1.1  200 ok
+					            Content-Length: 290
+								//响应内容的MIME类型
+								***Content-Type: text/html;charset=UTF-8
+								Date: Tue, 14 Mar 2017 05:50:05 GMT
+								//服务器名称和版本
+								Server: Apache-Coyote/1.1
+      2   反射
+	      public static void main(String[] args) {
+				//三种获取反射示例
+				Class clazz1=User.class;
+				Class clazz2=new User().getClass();
+			try {
+				Class clazz3=Class.forName("java_17.User");
+				//通过反射创建对象
+				User user=(User) clazz1.newInstance();
+				//通过反射操作有参构造
+				Constructor cs=clazz1.getConstructor(String.class,Integer.class);
+				User user1=(User) cs.newInstance("leo",23);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+	  3   泛型
+            写一个泛型方法，反转数组顺序
+            private static <T> void reverser(T[] arr) {
+				for(int start=0,end=arr.length-1;start<=end;start++,end--){
+					T temp=arr[start];
+					arr[start]=arr[end];
+					arr[end]=temp;
+				}
+			}
+			private static <T>void swap(T[] arr, int i, int j) {
+					T temp=arr[i];
+					arr[i]=arr[j];
+					arr[j]=temp;
+			}			
