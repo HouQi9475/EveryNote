@@ -55,4 +55,42 @@
 					T temp=arr[i];
 					arr[i]=arr[j];
 					arr[j]=temp;
-			}			
+			}
+      4   mybatis和hibernate的区别和应用场景
+            hibernate：是一个标准的ORM框架。对象关系映射。本质不需要写SQL，方便。但是对SQL语句进行优化，修改比较困难。
+			 应用场景：  适用于需求变化较少的中小型项目，比如 后台管理系统等。
+            mybatis:  专注SQL本身，需要我们自己编写SQL语句，修改优化比较方便。是一个不完全的ORM框架，虽然我们自己写SQL，但
+                      mybatis也可以实现输入映射，输出映射等
+             应用场景：  使用与需求变化较多的项目，比如  互联网项目
+
+          企业进行技术选型时，以低成本 高回报作为技术选型的原则，使用项目本身的技术，根据项目组的技术力量进行抉择。	
+      5   mybatis开发dao的方法
+	        目的：通过工程获取sqlsession操作数据库
+			      sqlsession使用范围
+				  1，通过sqlsessionFactoryBuilder创建sqlsessionFactory:  将sqlsessionFactoryBuilder当作工具类，不需要单例
+				  2，通过sqlsessionFactory创建sqlsession，通过单例模式管理sqlsessionFactory(工厂一旦创建，一直使用一个实例)。
+				  将来Mybatis和spring整合后，使用单例模式管理sqlsessionFactory。
+				  3，sqlsession是面向用户(coder)的接口。提供了很多操作数据库的方法啊，selectOne，selectlist等
+				     sqlsession是线程不安全的，在sqlsession的实现类中，除了有接口中操作数据库的方法外，还有数据域的属性。
+					 sqlsession最佳的应用场合在方法体内(线程不安全的用在方法体内)，定义成局部变量使用。
+			原始dao开发： 编写dao接口和dao的实现类
+			                思路：需要向dao的实现类中注入会话工厂sqlsessionFactory，在方法体内通过工厂创建sqlsession
+                                  1，dao接口
+                                  2，dao实现类
+                            开发问题：dao接口实现类方法中存在大量的模版方法，设想能否将这些代码提取出来，大大减轻工作量
+                                      调用sqlsession方法时将statement的id硬编码了
+                                      调用sqlsession方法时，由于方法使用泛型，即使类型传入错误，编译阶段也不会报错，不利于开发							  
+			现在：        使用mapper代理方式(只需要mapper接口，相当于dao接口)
+             	            思路：
+							      编写mapper.xml映射文件
+								  需要写mapper接口遵循开发规范，mybatis可以自动生成mapper接口实现类的代理对象
+							开发规范：
+							      1，在mapper.xml中namespace等于mapper接口的地址
+								  2，mapper.java接口中的方法名和mapper.xml中statement的id一致
+								  3，mapper接口中方法的输入参数类型和mapper.xml中指定的parameterType的类型一致
+								  4，mapper接口中方法的返回值的类型和mapper.xml中指定的resultType的类型一致
+						    总结：以上的开发规范主要是对以下代码进行封装，统一生成
+									SqlSession sqlSession = sqlSessionFactory.openSession();
+									User user = sqlSession.selectOne("test.findUserById", id);
+									sqlSession.close();
+							记得在SqlMapConfig.xml中配置mapper.xml
