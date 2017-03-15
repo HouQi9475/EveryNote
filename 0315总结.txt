@@ -1,0 +1,104 @@
+﻿0315总结
+         Servlet  单例，一个类只有一个对象，线程不安全的。所以效率高
+			 1,javaweb三大组件之一。servlet,filter，listerner
+			 2,每个servlet都是唯一的，它们能是不同的
+			 3,接收请求，处理请求，完成响应
+		 实现servlet的三种方式:
+			 1，实现javax.servlet.Servlet接口
+			 2，继承javax.servlet.GenericServlet类
+			 3，继承javax.servlet.http.HttpServlet类
+		 servlet中的大多数方法不由我们来调用，而是由tomcat调用，并且servlet对象也有tomcat来创建。
+		 生命周期方法： init(),service(),destory()
+		     init():  在servlet创建之后马上调用，只会被调用一次。
+			 service():它会被调用多次，每次处理请求都调用这个方法
+			 destory(): 在servlet被销毁前调用，只会被调用一次。(销毁前留遗言.....)
+		 如何让浏览器访问servlet
+             1，给servlet指定一个servlet路径,需要在web.xml中配置
+			       <servlet>
+				      <servlet-name>xxx</servlet-name>
+					  <servlet-class>com.leo.javaweb.servlet.Aservlet</servlet-class>
+				   </servlet>
+				   
+				   <servlet-mapping>
+				      <servlet-name>xxx</servlet-name>
+					  <url-pattern>/Aservlet</url-pattern>
+				   </servlet-mapping>
+             2，浏览器访问该路径		
+         ServletConfig
+             一个ServletConfig对象，对应一段web.xml中servlet配置信息
+         GenericServlet类：
+             是一个抽象类。用来简化操作
+             getServletConfig()
+             getServletContext()
+         HttpServlet类：
+             客户端发出请求，tomcat调用servlet生命周期方法(service(servletRequest,servletResponse)),对参数进行强转，
+             然后调用另一个service方法(service(httpservletrequest,httpservletresponse)),该方法获取请求方法，根据请
+             求方法来调用doGet() or  doPost()方法。我们需自己覆盖这两个方法，如果没有覆盖，则会报405错	
+                   HTTP Status 405 - HTTP method GET is not supported by this URL（没有覆盖doGet()方法）	
+             浏览器得到网址后，将该网址与web.xml中的url-pattern进行对比，匹配成功后通过servlet-name获取到对应的类，再通过反射技术
+             即Class.forName()获取到反射clazz,clazz.newinstance创建对象c,通过c.getMethod(“servie”,HttpServletRequest.class,HttpServletRespones.class)
+             得到方法m,m.invoke调用该方法。这些过程都是服务器自动实现的。
+         ServletContext
+             一个项目只有一个ServletContext对象。我们可以在N多个servlet中获取这同一个ServletContext，使用它可以给多个servlet传递对象
+			 这个对象在tomcat启动时生成，tomcat关闭是关闭。
+	     获取ServletContext
+		     ServletConfig.getServletContext();
+			 GenericServlet.getServletContext();
+			 HttpSession.getServletContext();
+		 域对象功能
+		     ServletContext是javaweb四大域对象之一(PageContext,ServletRequest,HttpSession,ServletContext),域对象必须要有存储数据功能
+			 域对象在多个servlet中传递数据。因为域对象中有个map，用来存储数据，下面是ServletContext对象用来操作数据的方法：
+			 void setAttribute(String name,Object value)  用来存储数据，多次调用会覆盖上次操作
+			 Object getAttribute(String name)  通过名称获取数据
+			 void removeAttribute(String name)  移除数据
+			 Enumeration getAttributeNames()  获取所有域属性的名称
+		 ServletContext获取资源路径
+		     String path=this.getServletContext.getRealPath("/index.jsp");带盘符的路径
+			 
+         练习：统计访问量
+              1,获取ServletContext对象
+              2,获取ServletContext对象中的“count”值
+			  3,如果不存在，则设置值为一，保存到servletContext中
+			  4,如果存在，表示以前访问过，在基础加你，向浏览器输出次数，再次保存到servletContext中
+					ServletContext context=this.getServletContext();
+					Integer count=(Integer) context.getAttribute("count");
+					if(count==null){
+						count=1;
+					}else{
+						count++;
+					}
+					response.getWriter().print("<h1>这是第"+count+"次访问！</h1>");
+					context.setAttribute("count", count);
+===========================================================================================================================================
+         MyBatis
+		      SqlMapConfig.xml  
+			  properties属性：
+			     需求：将数据库的连接参数单独配置在db.properties中，只需要在 SqlMapConfig.xml中加载该 db.properties即可
+				       就不需要在 SqlMapConfig.xml对数据库进行硬编码了。
+					   db.properties：	jdbc.driver=com.mysql.jdbc.Driver
+										jdbc.url=jdbc:mysql://localhost:3306/mybatis
+										jdbc.username=root
+										jdbc.password=mysql
+			  typeAliases(别名)
+			     需求：在mapper.xml中定义了很多的statement，statement需要 parameterType指定输入的参数类型，需要resultType指定输出类型
+				       如果在指定类型的时候输入类型的全路径不方便开发，可以设置定义一些别名，针对parameterType，resultType指定的类型定义，方便开发
+					   基本数据类型有默认别名，针对pojo需要自定义
+							<typeAliases>
+								<!-- 单个别名定义 -->
+								<typeAlias alias="user" type="cn.itcast.mybatis.po.User"/>
+								<!-- 批量别名定义，扫描整个包下的类，别名为类名（首字母大写或小写都可以） -->
+								<package name="cn.itcast.mybatis.po"/>
+								<package name="其它包"/>
+							</typeAliases>
+				遇到错误：必须按顺序写配置
+					<!-- 注意：每个标签必须按顺序写，不然蛋疼的DTD会提示错误：The content of element type "configuration" must match 
+					"(properties?,settings?,typeAliases?,typeHandlers?,objectFactory?,objectWrapperFactory?,plugins?,environments?,mappers?)". --> 
+              mappers(映射配置)
+			        (通过resource加载单个映射文件)
+						<mappers>
+						   <mapper resource="mapper/UserMapper.xml"/>
+						</mappers>	
+                    (通过mapper接口加载)
+						注册指定包下的所有mapper接口
+						如：<package name="cn.itcast.mybatis.mapper"/>
+						注意：此种方法要求mapper接口名称和mapper映射文件名称相同，且放在同一个目录中。					
