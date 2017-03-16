@@ -1,0 +1,65 @@
+0316总结
+        服务器处理请求的流程：
+		    服务器每次收到请求时，都会为这个请求开辟一个新的线程
+			服务器会把客户端的请求封装到一个request对象中，这个request对象就是请求数据的载体
+			服务器还会创建response对象，这个对象和客户端联系在一起，它可以用来向客户端发送响应
+		response响应
+		    200成功  302重定向   404客户端错误   500服务器错   405get请求方法未定义
+			HttpServletResponse: 与http协议相关的类型   setStatus()发送状态码   serError(int sc)发送错误状态码
+			ServletResponse:与协议无关的类型
+			响应头是一个键值对(一个name对应一个或多个值)
+		request
+		    getRomoteAdd()获取IP
+			getMethod()获取请求方法 get/post
+			获取HTTP请求头：
+			   String getHeader(String name) 适用于单值头
+			   int getHeader(String name) 适用于单值int类型的请求头
+			   User-Agent 
+				String ip=request.getRemoteAddr();
+				System.out.println("ip地址为："+ip);
+				String method=request.getMethod();
+				System.out.println("请求方法为："+method);
+				String agent=request.getHeader("User-Agent");
+				System.out.println("请求头为："+agent);
+				//Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0
+				if(agent.toLowerCase().contains("firefox")){
+					response.getWriter().println("您好"+ip+",您的浏览器是：火狐");
+				}
+				//获取项目名
+				String name=request.getContextPath();
+				System.out.println("项目名："+name);
+				//获取请求的URL(不包含参数的整个请求路径)
+				StringBuffer url=request.getRequestURL();
+				System.out.println("请求路径："+url);
+				//获取请求uri,等于项目名加servlet
+				String uri=request.getRequestURI();
+				System.out.println("请求URI："+uri);
+				//获取参数部分，即问号后面的部分  ?username=1&password=1
+				String param=request.getQueryString();
+		获取请求参数
+		    String getParameter(String name) 获取指定名称的请求参数
+			String[] name=getParameterValues(String name)
+			Map<String,String[]> getParamerterMap() 获取所有请求参数，其中key为参数名，value为参数值
+				获取所有请求参数的name：Enumeration names=request.getParameterNames();
+										while(names.hasMoreElements()){
+											System.out.println(names.nextElement());
+										}
+			请求转发和请求包含
+			    RequestDispatcher rd=request.getRequestDispatcher("/BServlet");  使用request获取 RequestDispatcher对象，参数是
+                被转发或包含的servlet
+            请求转发：rd.forword(request,response)
+            请求包含：rd.include(request,response)
+            有时一个请求需要多个servlet来完成，所以需要在一个servlet跳转到另一个servlet
+            请求转发：由下一个servlet完成响应体，当前servlet可以设置响应头(留头不留体,第一个中的响应体被忽略)
+            请求包含：由两个servlet共同完成响应体
+            无论是请求转发还是请求包含，都在一个请求范围内，使用一个request和response
+        request 域
+		    servlet中三大域对象  request，session，application，都有如下方法
+            void setAttribute(String name,Object value)
+            Object getAttribute(String name)			
+			removeAttribute(String name)
+		请求转发和重定向区别
+		    请求转发一次请求，一次响应。重定向两次请求两次响应
+			请求转发地址栏不变，重定向会变化
+			请求转发只能转发到本项目的servlet，重定向能定向到其他servlet.
+			
