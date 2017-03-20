@@ -1,0 +1,131 @@
+0320总结
+    编码
+	    常见字符编码： iso-8859-1(不支持中文),gb2312,gbk(中国国标码),utf-8(万国码，支持全世界编码)
+		一般浏览器会把数据当作gbk的编码。
+		1,响应编码
+		  当使用response.getwrite()向客户端发送响应前，如果不设置编码，则默认为iso,不支持中文
+		  当使用response.getwrite()向客户端发送响应前，设置response.setCharacterEncoding()来设置编码为gbk或utf-8，则不会乱码
+		  当使用response.getwrite()向客户端发送响应前，设置response.setHeader("Content-type","text/html;charset=utf-8")来设置响应头,使浏览器
+		收到服务器使用的编码是utf-8。这个方法不只是设置响应头，还会设置serCharacterEncoding()，即一句顶两！
+		  setHeader()便捷方式：response.setContentType("text/html;charset=utf-8")
+        2,请求编码
+		  tomcat默认使用iso来处理请求参数 tomcat8默认为utf-8
+		  post方法：只需要在获取参数前调用request.setCharacterEncoding("utf-8")
+		  get方法：反编码  String name=request.getParameter("name");  Byte[] byte=name.getBytes("iso-8859-1"); name=new String(byte,"utf-8");
+          客户端传递的是什么编码的数据？  
+             1),你是怎么传的？ A，在地址栏中直接给出参数(gbk)。B，在页面中点击表单或链接(utf-8)。如果你页面是utf-8,则传递的相同
+        路径：
+          web.xml中的《url-pattern》是servlet路径
+              要么以*开头，要么以/开头，要么以/开头
+          转发和包含路径：
+              以/开头，相当于当前项目路径，例如：localhost:8080/项目名/
+              不以/开头，相当于servlet路径
+          重定向路径：（客户端路径）
+              以/开头，相当于当前主机，例如：localhost:8080。所以需要自己写项目名
+		  页面中超链接和表单路径
+		      与重定向相同，都是客户端路径，需要添加项目名
+			  <form action="/javaweb/AServlet/>
+		  ServletContext获取资源目录
+		     getRealPath  带盘符的路径
+===============================================================================================================================
+MyBatis
+			<mapper class=" " />
+			使用mapper接口类路径
+			如：<mapper class="cn.itcast.mybatis.mapper.UserMapper"/>
+			注意：此种方法要求mapper接口名称和mapper映射文件名称相同，且放在同一个目录中。
+			
+			<package name=""/>
+			注册指定包下的所有mapper接口
+			如：<package name="cn.itcast.mybatis.mapper"/>
+			注意：此种方法要求mapper接口名称和mapper映射文件名称相同，且放在同一个目录中。
+			
+	Mapper.xml映射文件
+	    Mapper.xml映射文件中定义了操作数据库的sql，每个sql是一个statement，映射文件是mybatis的核心。
+		parameterType(输入类型)
+		    #{}与${}
+				#{}实现的是向prepareStatement中的预处理语句中设置参数值，sql语句中#{}表示一个占位符即?。
+				<!-- 根据id查询用户信息 -->
+				<select id="findUserById" parameterType="int" resultType="user">
+					select * from user where id = #{id}
+				</select>
+			使用占位符#{}可以有效防止sql注入，在使用时不需要关心参数值的类型，mybatis会自动进行java类型和jdbc类型的转换。
+			#{}可以接收简单类型值或pojo属性值，如果parameterType传输单个简单类型值，#{}括号中可以是value或其它名称。
+			${}和#{}不同，通过${}可以将parameterType 传入的内容拼接在sql中且不进行jdbc类型转换，
+			 ${}可以接收简单类型值或pojo属性值，如果parameterType传输单个简单类型值，${}括号中只能是value。
+			 使用${}不能防止sql注入，但是有时用${}会非常方便，如下的例子：
+			    <!-- 根据名称模糊查询用户信息 -->
+				<select id="selectUserByName" parameterType="string" resultType="user">
+				   select * from user where username like '%${value}%'
+				</select>
+			如果本例子使用#{}则传入的字符串中必须有%号，而%是人为拼接在参数中，显然有点麻烦，
+			如果采用${}在sql中拼接为%的方式则在调用mapper接口传递参数就方便很多。
+			//如果使用占位符号则必须人为在传参数中加%
+			List<User> list = userMapper.selectUserByName("%管理员%");
+
+			//如果使用${}原始符号则不用人为在参数中加%
+			List<User>list = userMapper.selectUserByName("管理员");
+
+			再比如order by排序，如果将列名通过参数传入sql，根据传的列名进行排序，应该写为：
+			ORDER BY ${columnName}
+			如果使用#{}将无法实现此功能。
+	传递pojo包装对象
+			开发中通过pojo传递查询条件 ，查询条件是综合的查询条件，不仅包括用户查询条件还包括其它的查询条件（比如将用户购买商品信息也作为查询条件），
+			这时可以使用包装对象传递输入参数。
+		        定义包装对象
+				定义包装对象将查询条件(pojo)以类组合的方式包装起来。
+				public class QueryVo {
+	
+					private User user;
+					
+					//自定义用户扩展类
+					private UserCustom userCustom;
+		resultType
+		    使用requestType进行输出映射时，只有查询出来的列名与Pojo中的属性名一致时，才可以映射成功。否则数据为空
+	动态SQL
+	     通过mybatis提供的各种标签方法实现动态拼接sql。
+		 对查询条件进行判断，如果输入参数不为空，则进行查询条件拼装。
+		 <!-- 通过判断动态拼接SQL where 可以自动去掉条件中的第一个and -->
+		<where>
+			<if test="userCustom!=null">
+				<if test="userCustom.sex!=null and userCustom.sex=''">
+					and user.sex=#{userCustom.sex}
+				</if>
+				<if test="userCustom.username !=null and userCustom.username='' ">
+					and user.username like '%${userCustom.username}%'
+				</if>
+			</if>
+		</where>
+	SQL片段
+	    Sql中可将重复的sql提取出来，使用时用include引用即可，最终达到sql重用的目的
+		将where中片段抽取出来
+				<sql id="query_user_where">
+					<if test="id!=null and id!=''">
+						and id=#{id}
+					</if>
+					<if test="username!=null and username!=''">
+						and username like '%${username}%'
+					</if>
+				</sql>
+		使用include引入
+				<select id="findUserList" parameterType="user" resultType="user">
+					select * from user 
+					<where>
+					<include refid="query_user_where"/>
+					</where>
+				</select>
+		注意：如果引用其它mapper.xml的sql片段，则在引用时需要加上namespace，如下：
+				<include refid="namespace.sql片段”/>
+	Foreach
+	   向sql传递数组或List，mybatis使用foreach解析
+	   <if test="ids!=null and ids!=''">
+	    <!--collection:输入指定对象中集合属性  
+	        item:每次遍历生成的对象
+	        open/close:开始和结束遍历时生成的字符串
+	        separator：遍历的两个对象中需要拼接的串
+	        实现如下SQL拼接：
+	        and (id=1 or id=2 or id=3)
+	        -->
+	       <foreach collection="ids" item="user_id" open="and (" close=")" separator="or">
+	           id=#{user_id}
+	       </foreach>
+	    </if>
