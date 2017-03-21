@@ -1,0 +1,61 @@
+﻿0321总结
+    JSP(java server pages)
+	   servlet:缺点：不适合设置HTML响应体，需要大量的response.getwrite.print()
+	           优点：动态资源，可以编程
+	   html:缺点：静态页面，不能包含动态信息
+	   jsp: 优点：在原有HTML基础上添加Java脚本，构成jsp页面
+	JSP和Servlet分工
+	   jsp:作为请求发起页面，例如显示表单，超链接。
+	       作为请求结束页面，例如显示信息
+	   servlet:
+	       作为请求中处理数据的环节
+	JSP组成
+	    jsp=html+java脚本+jsp标签
+		jsp中无需创建即可使用的对象一共有九种，即九大内置对象，例如request.out...
+		3中Java脚本：
+		   <%...%>  java代码片段，常用，方法内能写什么这里就可以写什么
+		   <%=..%>  Java表达式，用于输出结果，常用
+		   <%!..%>  用于创建类的成员变量和成员方法，基本不用
+	JSP原理
+	    jsp是一种特殊的servlet
+		当jsp页面被第一次访问时，服务器会把Jsp转换成java文件（即servlet类）
+		然后在编译成.class文件
+		然后创建对象
+		调用service()方法
+		第二次请求同一个Jsp时，直接调用service方法。
+	JSP注释
+	    <!-- -->同HTML，可以通过查看源代码看到。
+		<%-- --%>   jsp隐藏注释，通过网页源代码看不到
+		//  /* */  单行多行注释
+	--------------------------------------------------------------------------------------------------
+	Cookie(一键一值)  cookie是不能跨浏览器的
+	    是服务器存到客户端的东西。由服务器创建，保存到客户端。下次访问再回传给服务器
+		作用：服务器使用cookie来跟踪客户端状态
+		      保存购物车，不能用request，因为是客户端发送给服务器的多个请求
+			  显示上次登录名(也是一个用户多个请求)
+		javaweb中使用cookies
+		   response.addCookie() 向浏览器保存cookie
+		   request.getCookie()  得到浏览器传回的cookie
+		Cookie详解
+		   不只有name和value两个属性
+		   maxAge() 最长时长，以秒为单位
+    ---------------------------------------------------------------------------------------------------
+	session
+	    httpsession是由javaweb提供的，用来会话跟踪的类，session是服务器端对象，保存在服务器端
+		是servlet三大域之一(request.session.application)，所以他也有setAttritube()等方法。
+		底层依赖cookie
+	作用：
+	    会话范围：某个用户从首次访问服务器开始，到该对象关闭浏览器结束
+		   会话：一个用户对服务器的多次连贯性请求，连贯性请求就是多次请求之间没有关闭浏览器
+		servlet中得到session  HttpSession session=request.getSession();
+		jsp中session是内置对象，无需创建。
+	session原理
+	    request.getSession()方法
+		  1，获取cookie中的sessionid，
+		     a,如果不存在，创建session，把session保存起来，把新创建的sessionid保存到cookie中。
+			 b,如果存在，通过sessionid查找session，	如果没找到，创建session，把新创建的sessionid保存到cookie中。
+			 c,如果存在，通过sessionid找到session，找到后就不会创建了。
+		  如果创建了新的session，浏览器会得到一个包含sessionid的cookie对象，这个cookie的生命值为-1，即只在浏览器
+		 内存中存在，如果不关闭浏览器，一直存在。
+		  下次请求是，通过 request.getSession()方法可以通过sessionid在cookie中找到session对象，与上一次是同一个session。
+		request.getSession(false)  如果session缓存中没有session，则不会进行创建，而是返回null
