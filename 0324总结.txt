@@ -1,0 +1,133 @@
+0324总结
+    EL表达式
+	   是JSP内置的表达式语言，全域查找
+	   格式：${} 
+		     session.setAttribute("xxx","XXX");
+		     ${xxx} 取值，如果不存在，输出空字符串，不是null.
+	    JSP2.0开始不使用Java脚本，使用EL表达式和动态标签替代Java脚本。
+		EL替代的是<%= %>。只能做输出，不能设置。
+			 ${pageScopt.xxx}
+			 ${requestScopt.xxx}
+			 ${sessionScopt.xxx}
+			 ${applicationScopt.xxx}
+	    EL可以输出的东西都在11个内置对象里：pageScope，requestScope，sessionScope，applicationScope为其中4个。
+			param 对应参数
+			paramValues  适用于多值参数
+		    header 对应请求头，也是MAP，KEY为请求头，value为单个头值
+			headerValues 适用于多值请求头
+			initParam  获取<Context-param> 初始化参数
+			cookie  Map<String,Cookie> key是cookie的name,value是cookie对象  ${cookie.jsessionid.value} cookie.jsessionid是cookie对象
+			pageContext  只有这个不是MAP类型  ${pageContext.request.contextPath} 获取项目名
+====================================================================================================================================
+MyBatis
+        多对多关联查询
+		目的：查询用户购买的商品
+			主表： user
+			将orders表以List<Orders> orders作为user的属性
+			将orderdetail表以List<OrderDetail> orderdetail作为orders的属性
+			将items表以Items items作为orderdetail的属性
+		SQL:
+		    select orders.*,
+				user.username,user.sex,user.address,
+				orderdetail.id ordersdetail_id, orderdetail.items_id,orderdetail.items_num,orderdetail.orders_id ,
+				items.id,items.id items_id,items.name items_name,items.detail items_detail 
+			from 
+				orders,user,orderdetail,items 
+			where 
+				orders.user_id=user.id and orderdetail.orders_id=orders.id and orderdetail.items_id=items.id;
+		mapper.xml
+		    <!-- 查询用户购买的商品信息，多对多 -->
+				<resultMap type="com.leo.mybatis.po.User" id="UserAndItemsByResultMap">
+					<!-- 用户信息 -->
+					<id column="user_id" property="id"/>
+					<result column="username" property="username"/>
+					<result column="sex" property="sex"/>
+					<result column="address" property="address"/>
+					<!-- 订单信息:1对多，用collection -->
+					<collection property="orders" ofType="com.leo.mybatis.po.Orders">
+						<id column="id" property="id"/>
+						<result column="user_id" property="userId"/>
+						<result column="number" property="number"/>
+						<result column="createtime" property="createtime"/>
+						<result column="note" property="note"/>
+							<!-- 订单项：1对多，也是用collection -->
+							<collection property="orderdetails" ofType="com.leo.mybatis.po.Orderdetail">
+							   <id column="ordersdetail_id" property="id"/>
+							   <result column="items_id" property="itemsId"/>
+							   <result column="items_num" property="itemsNum"/>
+							   <result column="orders_id" property="ordersId"/>
+								   <!-- 商品列表: 1对1 使用 association-->
+								   <association property="items" javaType="com.leo.mybatis.po.Items">
+									   <id column="items_id" property="id"/>
+									   <result column="items_name" property="name"/>
+									   <result column="items_detail" property="detail"/>
+								   </association>
+							</collection>
+					</collection>
+				</resultMap>
+				<select id="findUserAndItemsByResultMap" resultMap="UserAndItemsByResultMap">
+					select orders.*,
+						user.username,user.sex,user.address,
+						orderdetail.id ordersdetail_id,
+						orderdetail.items_id,orderdetail.items_num,orderdetail.orders_id ,
+						items.id,items.id items_id,items.name items_name,items.detail
+						items_detail
+					from
+						orders,user,orderdetail,items
+					where
+						orders.user_id=user.id and orderdetail.orders_id=orders.id and
+					orderdetail.items_id=items.id;
+				</select>
+		延迟加载
+		    需要查询关联信息时，使用mybatis延迟加载特性可有效的减少数据库压力，首次查询只查询主要信息，关联信息等用户获取时再加载。
+			查询订单信息，关联查询用户信息。默认只查询订单信息，当需要查询用户信息时再去查询用户信息。
+			SQL语句：
+			    SELECT 
+				  orders.*
+				FROM
+				  orders 
+			定义PO类
+			    在Orders类中加入User属性。
+			mapper.xml 
+			    <select id="findOrderAndUserLazyLoading" resultMap="OrderAndUserLazyLoadingResultMap">
+					 select orders.* from orders;
+				</select>
+				<!-- 延迟加载 -->
+				<resultMap type="" id="OrderAndUserLazyLoadingResultMap">
+					 <id column="id" property="id" />
+					<!-- <result />：普通结果，即pojo的属性。 -->
+					<result column="user_id" property="userId" />
+					<result column="number" property="number" />
+					<result column="createtime" property="createtime" />
+					<result column="note" property="note" />
+					<!-- association：表示进行关联查询单条记录 property：表示关联查询的结果存储在cn.itcast.mybatis.po.Orders的user属性中 
+						javaType：表示关联查询的结果类型 
+						select:指定关联查询sql为com.leo.mybatis.mapper.UserMapper.findUserById
+						column:关联查询时将users_id列的值传入findUserById
+						最后将关联查询结果映射至com.leo.mybatis.po.User。-->
+					<association property="user" javaType="com.leo.mybatis.po.User"
+					select="com.leo.mybatis.mapper.UserMapper.findUserById" column="users_id">		
+					</association>
+				</resultMap>
+			在SqlMapConfig.xml中打开延迟加载开关
+				<!-- 打开延迟加载开关 -->
+				<settings>
+					<!-- 全局性设置懒加载。如果设为‘false’，则所有相关联的都会被初始化加载。默认false -->
+					<setting name="lazyLoadingEnabled" value="true" />
+					<!-- 当设置为‘true’的时候，懒加载的对象可能被任何懒属性全部加载。否则，每个属性都按需加载。默认true -->
+					<setting name="aggressiveLazyLoading" value="false" />
+				</settings>
+			测试：
+                @Test
+				public void testFindOrderAndUserLazyLoading(){
+					SqlSession sqlSession=sqlSessionFactory.openSession();
+					OrdersMapperCustom ordersMapperCustom=sqlSession.getMapper(OrdersMapperCustom.class);
+					List<Orders> orders=ordersMapperCustom.findOrderAndUserLazyLoading();
+					System.out.println(orders);
+					//开始延迟加载，通过orders.getUser()方法进行加载
+					for(Orders order:orders){
+						User user=order.getUser();
+						System.out.println(user);
+					}
+					sqlSession.close();
+				}			
