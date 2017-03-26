@@ -1,0 +1,9 @@
+Spring Mybatis 整合
+    实现mybatis与spring进行整合，通过spring管理SqlSessionFactory、mapper接口。
+	mybatis与spring整合jar
+		mybatis官方提供与mybatis与spring整合jar包 mybatis-spring-1.2.2.zip
+		spring3.2.0
+		mybatis3.2.7
+		dbcp连接池
+		数据库驱动
+	

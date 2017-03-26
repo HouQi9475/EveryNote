@@ -1,0 +1,129 @@
+﻿Maven
+     解压
+	    apache-maven-3.2.1
+	 配置环境变量
+	    M2_HOME:D:\Maven\apache-maven-3.2.1
+		PATH:   D:\Maven\apache-maven-3.2.1\bin
+	 Maven运行：
+	    先找用户配置，再找全局配置
+		用户配置：
+		    C:\Users\Administrator\.m2
+		全局配置：
+		    D:\Maven\apache-maven-3.2.1\conf
+		为了方便操作，建议只使用全局配置。
+		在全局setting.xml中配置仓库地址    
+		<localRepository> E:\BaiduYunDownload\java项目\SSM药品集中采购平台\yycgrepository\repository </localRepository>
+		在命令行执行Maven命令，只有全局配置
+	Eclipse执行
+	    只需配置Maven用户配置，在本地仓库中创建settting.xml，是执行时找的用户的配置文件
+YYCG药品采购
+       1， 技术架构模块  springmybatis
+	   2， 工具模块      utils
+	   3，业务模块      business   
+	   4，系统基础模块  Base
+		
+		业务模块和系统基础模块依赖于技术架构模块和工具模块，所以要在pom.xml中添加依赖。
+		    <!-- 依赖技术架构模块，把GAV添加进来 -->
+			<dependency>
+				<groupId>yycg</groupId>
+				<artifactId>springmybatis</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<!-- 依赖工具类模块 -->
+			<dependency>
+				<groupId>yycg</groupId>
+				<artifactId>yycgutils</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			
+		5，聚合模块yycgparent
+           开发在eclipse上，将开发后的代码提交到SVN，测试从SVN得到代码，编译，打成WAR包，将WAR拷贝到测试服务器中
+           最终工具类模块utils生成jar包，给主工程用，主工程打成WAR包。	
+               聚合工程：  包括utils和主工程。将各个工程聚合起来，maven自动识别模块间依赖
+               测试人员将各个模块从SVN上下载，只需要在聚合工程目录中，运行MVN命令，将各个工程聚合，生成WAR包。	
+           创建聚合工程：yycgparent
+		   功能：将各个模块聚合，不需要开发，将各个子工程的pom聚合到一块
+		        创建MAVEN功能，修改pom.xml
+					<groupId>yycg</groupId>
+					<artifactId>yycgparent</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+					<packaging>pom</packaging>   注意：将jar改为pom
+			    加入各个模块
+				   <!-- 设置子模块目录，目录中要有Pom.xml文件,使用相对路径 -->
+				   <modules>
+					  <module>../springmybatis</module>
+					  <module>../yycgproject</module>
+					  <module>../yycgutils</module>
+				   </modules>
+		   
+               	在各个子工程模块添加父模块节点
+                    <!-- 添加父模块节点 -->
+					<parent>
+						<!-- 相对路径，父模块Pom.xml所在位置 -->
+						<relativePath>../yycgparent</relativePath>
+						<!-- 添加父模块的GAV三坐标 -->
+						<groupId>yycg</groupId>
+						<artifactId>yycgparent</artifactId>
+						<version>0.0.1-SNAPSHOT</version>
+					</parent>
+					<!-- 添加完父模块节点后，将下面groupId和Version注释。已经继承父模块 -->				
+						<!-- <groupId>yycg</groupId> -->
+						<!-- <version>0.0.1-SNAPSHOT</version> -->
+	        需要自动生成WAR包，所以在主工程yycgproject的Pom.xml中添加生成WAR包的插件
+			    <!-- war包生成插件 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.4</version>
+					<configuration>
+						<warSourceDirectory>src/main/webapp</warSourceDirectory>
+					</configuration>
+				</plugin>
+			为了生成WAR包后，自动启动tomcat运行(达到一步构建，只要运行mvn命令，则编译，打包，运行一步到位)
+			    <!-- tomcat运行插件 -->
+				<plugin>
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.2.3</version>
+					<configuration>
+						<container>
+							<containerId>tomcat8x</containerId>
+							<home>D:\apache-tomcat-8.0.33-windows-x64\apache-tomcat-8.0.33</home>
+						</container>
+						<configuration>
+							<type>existing</type>
+							<home>D:\apache-tomcat-8.0.33-windows-x64\apache-tomcat-8.0.33</home>
+						</configuration>
+					</configuration>
+					<executions>
+						<execution>
+							<id>cargo-run</id>
+							<phase>install</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+		    在CMD命令行下执行工程聚合，达到一步构建
+			    cmd进去yycgparent,执行mvn install生成WAR包。
+				cmd运行，先找用户setting.xml，再找全局setting.xml
+				运行完 mvn install之后，在本地仓库中查找是否有三个工程的jar包
+	主工程模块三层构建：基础架构：spring+mybatis
+        包括：
+            Base:业务基础模块
+			     主要是系统管理模块
+				 整合dao：达到目标：spring管理dao接口
+				    让spring对sqlsessionfactory进行管理，由sqlsessionfactory自动生成sqlsession,sqlsession就是dao接口中使用的
+					配置文件：
+					   db.properties-----数据库文件，配置连接参数
+					   sqlMapConfig.xml-----mybatis核心配置文件，mybatis配置项
+					   applicationContext.xml-----spring核心配置文件，
+					   applicationContext-dao.xml
+					   applicationContext-service.xml
+				 整合service
+				 整合action
+				 
+				 
+            Business:业务模块		
+                 包括药品目录，采购单，统计分析等			

@@ -1,0 +1,32 @@
+Maven搭建遇到问题
+   项目构建，管理，jar包下载
+	   1，下载maven 
+	   2，当我们下载好maven以后，进行解压
+	   3，设置环境变量，以使cmd执行程序命令的可以查找到该命令文件的位置
+		  M2_HOME  maven安装目录
+		  在path中加入 %M2_HOME%\bin
+	   4，在命令行 mvn -v 测试是否成功配置好maven
+    在本地用户目录下有.m2文件夹，把maven/conf下的setting.xml拷贝到该文件夹下。
+	将内容修改<localRepository>C:\Users\Administrator\.m2\repository</localRepository>
+	因为在外网下载jar包速度过慢，所以配置到阿里云的下载路径进行下载，在setting.xml中配置
+	    <mirror>
+			<id>nexus-aliyun</id>
+			<mirrorOf>*</mirrorOf>
+			<name>Nexus aliyun</name>
+			<url>
+			http://maven.aliyun.com/nexus/content/groups/public
+			</url>
+		</mirror>
+	创建项目时发现mvn archetype:generate 执行很慢的原因：发现 执行获取 remote 的 archetype-catalog.xml 文件 会很慢 
+	网上下载archetype-catalog.xml文件，放到与setting.xml同一个位置，执行$mvn archetype:generate -DarchetypeCatalog=local
+	从本地下载。
+	
+	
+	导入一个maven工程后 一直显示importing maven projects 10%
+	解放方法:
+	            找到eclipse.ini
+				加入
+				-vm
+				$JAVA_HOME%/bin/javaw.exe
+
+				再次重启eclipse即可
