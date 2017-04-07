@@ -1,0 +1,75 @@
+﻿0407总结
+     jsp三大组件之：监听器listener
+	 监听器是一个接口，内容由我们来实现，需要注册，例如注册在按钮上。
+	 监听器的方法会在特定事件发生时被调用。
+	 性质：
+	   观察者：
+	     事件源：引发事件的东西。。（打架的人）（小偷）
+		 事件  ：（打架）  （偷东西）
+		 监听器：（警察！） （小偷）   警察把注意力放在事件源小偷身上，等待小偷偷东西。。
+		          监听器中的方法：（抓捕！）一个监听器可以有多个方法
+	 在Javaweb中：
+	     被监听的事件源有：ServletContext,
+		                       生命周期监听：ServletContextListener  两个方法：一个出生时调用，一个死亡是调用
+							   属性监听：ServletContextAttributeListener  三个方法：添加属性时，替换属性时，删除属性时。
+							             void attributeAdded(ServletContextAttributeEvent event) 
+										 void attributeRemoved(ServletContextAttributeEvent event) 
+                                         void attributeReplaced(ServletContextAttributeEvent event)
+		                   HttpSession
+							   生命周期监听：HttpSessionListener  两个方法：一个出生时调用，一个死亡是调用
+							           void sessionCreated(HttpSessionEvent he)
+									   void	sessionDestoryed(HttpSessionEvent he)
+							   属性监听：HttpSessionAttributeListener  三个方法：添加属性时，替换属性时，删除属性时。
+							   感知监听：无需在xml中配置，监听javabean，javabean会知道自己是否在session中。
+						   ServletRequest
+							   生命周期监听：ServletRequestListener  两个方法：一个出生时调用，一个死亡是调用
+							           void requestDestroyed(ServletRequestEvent sre)
+                                       void requestInitialized(ServletRequestEvent sre)
+							   属性监听：ServletRequestAttributeListener  三个方法：添加属性时，替换属性时，删除属性时。
+							             void attributeAdded(ServletRequestAttributeEvent srae) 
+										 void attributeRemoved(ServletRequestAttributeEvent srae) 
+										 void attributeReplaced(ServletRequestAttributeEvent srae) 
+							
+	javaweb中编写监听器：
+	    写一个监听器类，实现某个监听器接口
+		（可以存放一些在tomcat启动时需要加载的数据）
+		    public class AListener implements ServletContextListener {
+					public void contextDestroyed(ServletContextEvent arg0) {
+						System.out.println("哇，我挂了!");
+					}
+					public void contextInitialized(ServletContextEvent arg0) {
+					   System.out.println("哇，我来也！");
+					}
+			}	
+		注册：在web.xml中配置
+			  <listener>
+				 <listener-class>com.leo.javaweb.listener.AListener</listener-class>
+			  </listener>
+	------------------------------------------------------------------------------------------------------------------------------
+	过滤器：
+	    它会在一组资源（servlet,jsp,html等）的前面执行。可以让请求得到目标资源也可以不让请求得到目标资源。
+		过滤器有拦截请求的功能
+		如何编写：
+		   先写一个过滤器类实现filter接口
+		   然后在web.xml中配置
+		   Filter接口三个方法：
+		   void init  创建之后马上执行，Filed会在服务器启动时创建
+		   void destroy  销毁之前，在服务器关闭时销毁
+		   void doFilter(ServletRequerst,ServletResponse,FilterChain) 每次过滤时都会执行
+		   
+		   Filter是单例的，
+		   <filter>
+		      <filter-name></filter-name>
+			  <filter-class></filter-class>
+		   </filter>
+		   <fileter-mapping>
+		      <filter-name></filter-name>
+			  <url-pattern></url-pattern>
+		   </fileter-mapping>
+		   
+		   FilterCongif----类似于servletConfig
+		      获取初始化参数getInitParameter()
+			  获取过滤器名称
+			  获取application getServletContext()
+		   FilterChain  
+		      doFilter(ServletRequerst,ServletResponse) 放行！
