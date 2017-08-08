@@ -1,4 +1,4 @@
-0314随笔总结
+﻿0314随笔总结
       1   HTTP协议（无状态协议）
 	      协议：  协议的甲乙双方就是  客户端(浏览器)和服务器
 		          理解成双方通信的格式	
@@ -94,3 +94,4 @@
 									User user = sqlSession.selectOne("test.findUserById", id);
 									sqlSession.close();
 							记得在SqlMapConfig.xml中配置mapper.xml
+
