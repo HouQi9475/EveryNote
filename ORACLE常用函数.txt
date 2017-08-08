@@ -1,0 +1,81 @@
+ORACLE常用函数
+
+SELECT SYSDATE+1/24/60*23 FROM DUAL
+SELECT contract_code,duty_username,input_date,trunc(months_between(sysdate,input_date)/12)
+from aa_fyinfo   --trunc 截取为整数   months_between两个时间间隔多少个月
+
+SELECT add_months(sysdate,15) from dual
+
+select * from aa_fyinfo where trunc(months_between(sysdate,input_date)/12)>=5
+--下一个星期五的日期   1-7 日-一
+select next_day(sysdate,'星期五') from dual
+select next_day(sysdate,6) from dual 
+--最后一天
+SELECT LAST_DAY(SYSDATE) FROM DUAL
+--ROUND TRUNC   四舍五入，截断
+select round(sysdate,'year') from dual
+select trunc(sysdate) from dual
+
+--通用函数
+--nvl 如果参数1不为空，返回参数1.否则返回参数2
+select nvl(1,2) from dual --1
+select nvl(null,2) from dual --2
+--nvl2 如果参数1不为空，返回参数2，否则返回参数3
+SELECT NVL2(1，2，3) FROM DUAL   --2
+SELECT NVL2(NULL，2，3) FROM DUAL  --3
+-- NULLIF 如果参数1和参数2不相等，返回参数1.如果相等，返回空
+SELECT NULLIF(1，2) FROM DUAL --1
+SELECT NULLIF(2，2) FROM DUAL --空
+--COALESCE 返回第一个空值
+SELECT COALESCE(1，2，3，4，5) FROM DUAL
+SELECT COALESCE(NULL,3，NULL,4，5) FROM DUAL
+--case,when,then ,end
+SELECT CONTRACT_CODE,FLOOR,
+       CASE FLOOR
+           WHEN 1 THEN '底层'
+           WHEN 2 THEN '中层'
+           ELSE '高层'
+       END AS 楼层
+FROM AA_FYINFO
+--decode
+SELECT CONTRACT_CODE,FLOOR,
+       DECODE(FLOOR,1,'一层',2,'二层',3,'三层',4,'四层','高层')AS 楼层
+FROM AA_FYINFO
+
+
+
+===================ORACLE字符函数============================
+create procedure Hello is                                                                       
+  dbms_output.put_line('Hello World');                                                          
+  end;                         													
+  
+CREATE OR REPLACE PROCEDURE GREET IS								
+  h number;											
+  g char(20);											
+  BEGIN												
+    SELECT EXTRACT(HOUR FROM CURRENT_TIMESTAMP) INTO h FROM dual;				
+    IF h>=20 OR h<=5 THEN									
+      g:='GoodsNight';										
+    ELSIF h>5 and h<=12 then									
+      g:='GoodMorning';										
+    ELSIF h>12 and h<=17 then									
+      g:='GoodAfternoon';									
+    ELSE											
+      g:='GoodEvening';										
+    END IF;											
+    DBMS_OUTPUT.PUT_LINE(g);									
+    END;											
+    
+    select extract(hour from CURRENT_TIMESTAMP) from dual
+ 
+
+-- 存储过程相对函数来说，功能相对复杂一点。但函数的实现的功能针对性比较强。
+--对于存储过程来说可以返回参数(output)，而函数只能返回值或者表对象。
+--存储过程一般是作为一个独立部分来执行，而函数可以作为查询语句的一部分来调用，由于函数可能返回一个表对象，所以可以放在from关键字后面。
+
+
+--存储过程的优点
+--1，执行速度更快，在数据库中保存过的存储过程都是编译过的。
+--2，允许模块化程序设计  类似方法的复用。
+--3，提高系统安全性，防止SQL注入
+--4，减少网络流通量，只需传入存储过程的名称。

@@ -1,0 +1,25 @@
+基础知识巩固
+1，String和StringBuffer的区别
+他们都可以存储和操作字符串，即包括多个字符的字符数据。String是一个final类型的，里面的值不可改变。
+而StringBuffer提供对字符串的修改。当你知道字符数据要改变的时候可以使用StringBuffer类，动态构建字符串。
+
+2，运行时异常和一般异常
+异常表示java运行过程中可能出现的一些错误。运行时异常表示虚拟机运行时可能抛出的一些异常情况，是一种常
+见的运行时错误。
+java编译器必须要求方法声明时抛出可能发生的非运行时异常。
+
+3，servlet的生命周期
+servlet被服务器实例化后，容器运行其init方法，接受到请求是调用service方法来处理，service自动选择是调用
+doGet还是doPost方法。service可以被调用多次。当服务器决定将实例销毁的时候调用其destroy方法。
+
+4，说出ArrayList,Vector, LinkedList的存储性能和特性
+Collection下的三大类。
+ArrayList,Vector都是使用数组方式存储数据，此数据元素数大于实际存储的数组内容，便于增加和插入数据。
+他们都允许直接按序号索引元素，但是插入元素要涉及数组元素移动等内存操作，所以索引快插入慢。
+Vector是synchronized(线程安全),通常性能上较ArrayList慢。线程安全效率就低。
+LinkedList是使用双向链表实现存储，按序号索引数据需要向前或向后遍历数据，但是插入数据只需要记录插入时的
+前项和后项即可，所以插入的速度快。
+
+5，Collection和Collections的区别
+Collection是LIST,SET的上级接口
+Collections是针对集合类的一个工具类，用来对集合进行排序，反转，线程安全等操作。
