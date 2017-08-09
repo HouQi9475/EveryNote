@@ -1,4 +1,7 @@
 基础知识巩固
+
+http://blog.csdn.net/jackfrued/article/details/44921941
+
 1，String和StringBuffer的区别
 他们都可以存储和操作字符串，即包括多个字符的字符数据。String是一个final类型的，里面的值不可改变。
 而StringBuffer提供对字符串的修改。当你知道字符数据要改变的时候可以使用StringBuffer类，动态构建字符串。
@@ -23,3 +26,42 @@ LinkedList是使用双向链表实现存储，按序号索引数据需要向前�
 5，Collection和Collections的区别
 Collection是LIST,SET的上级接口
 Collections是针对集合类的一个工具类，用来对集合进行排序，反转，线程安全等操作。
+
+6,final, finally, finalize的区别。 
+final 用于声明属性，方法和类，分别表示属性不可变，方法不可覆盖，类不可继承。
+finally是异常处理语句结构的一部分，表示总是执行。
+finalize是Object类的一个方法，在垃圾收集器执行的时候会调用被回收对象的此方法，可以覆盖此方法提供垃圾收集时的其他资源回收，例如关闭文件等。
+
+7,HashMap和Hashtable的区别。 
+HashMap是Hashtable的轻量级实现（非线程安全的实现），他们都完成了Map接口，主要区别在于HashMap允许空（null）键值（key）,由于非线程安全，效率上可能高于Hashtable。
+HashMap允许将null作为一个entry的key或者value，而Hashtable不允许。
+HashMap把Hashtable的contains方法去掉了，改成containsvalue和containsKey。因为contains方法容易让人引起误解。 
+
+8,sleep() 和 wait() 有什么区别? 
+sleep是线程类（Thread）的方法，导致此线程暂停执行指定时间，给执行机会给其他线程，但是监控状态依然保持，到时后会自动恢复。调用sleep不会释放对象锁。
+wait是Object类的方法，对此对象调用wait方法导致本线程放弃对象锁，进入等待此对象的等待锁定池，只有针对此对象发出notify方法（或notifyAll）后本线程才进入对象锁定池准备获得对象锁进入运行状态。
+
+9,int和Integer有什么区别？ 
+	public static void main(String[] args) {
+        Integer a = new Integer(3);
+        Integer b = 3;                  // 将3自动装箱成Integer类型
+        int c = 3;
+        System.out.println(a == b);     // false 两个引用没有引用同一对象
+        System.out.println(a == c);     // true a自动拆箱成int类型再和c比较
+    }
+简单的说，如果整型字面量的值在-128到127之间，那么不会new新的Integer对象，而是直接引用常量池中的Integer对象
+10,解释内存中的栈(stack)、堆(heap)和方法区(method area)的用法。 
+
+通常我们定义一个基本数据类型的变量，一个对象的引用，还有就是函数调用的现场保存都使用JVM中的栈空间；而通过new关键字和构造器创建的对象则放在堆空间，堆是垃圾收集器管理的主要区域，由于现在的垃圾收集器都采用分代收集算法，所以堆空间还可以细分为新生代和老生代.方法区和堆都是各个线程共享的内存区域，用于存储已经被JVM加载的类信息、常量、静态变量、JIT编译器编译后的代码等数据；程序中的字面量（literal）如直接书写的100、"hello"和常量都是放在常量池中，常量池是方法区的一部分。栈空间操作起来最快但是栈很小，通常大量的对象都是放在堆空间，栈和堆的大小都可以通过JVM的启动参数来进行调整，栈空间用光了会引发StackOverflowError，而堆和常量池空间不足则会引发OutOfMemoryError。
+
+11,用最有效率的方法计算2乘以8？ 
+2<<3
+
+12,构造器（constructor）是否可被重写（override）？ 
+构造器不能被继承，所以不能被重写，但可以被重载。
+
+13，两个对象值相同(x.equals(y) == true)，但却可有不同的hash code，这句话对不对？ 
+不对，如果两个对象x和y满足x.equals(y) == true，它们的哈希码（hash code）应当相同。Java对于eqauls方法和hashCode方法是这样规定的：(1)如果两个对象相同（equals方法返回true），那么它们的hashCode值一定要相同；(2)如果两个对象的hashCode相同，它们并不一定相同。
+
+14，当一个对象被当作参数传递到一个方法后，此方法可改变这个对象的属性，并可返回变化后的结果，那么这里到底是值传递还是引用传递？ 
+是值传递。Java语言的方法调用只支持参数的值传递。当一个对象实例作为一个参数被传递到方法中时，参数的值就是对该对象的引用。对象的属性可以在被调用过程中被改变，但对对象引用的改变是不会影响到调用者的。
