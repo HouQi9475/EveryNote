@@ -1,4 +1,4 @@
-﻿基础知识巩固
+基础知识巩固
 
 http://blog.csdn.net/jackfrued/article/details/44921941
 
@@ -81,3 +81,16 @@ jvm中类的加载是由类加载器*(ClassLoader)和他的子类来实现的。
 19，怎样将GB2312编码的字符串转换为ISO-8859-1编码的字符串？
 String s1 = "你好";
 String s2 = new String(s1.getBytes("GB2312"), "ISO-8859-1");
+
+20，String和StringBuilder、StringBuffer的区别？ 
+Java平台提供了两种类型的字符串：String和StringBuffer/StringBuilder，它们可以储存和操作字符串。其中String是只读字符串，也就意味着String引用的字符串内容是不能被改变的。而StringBuffer,StringBuilder类表示的字符串对象可以直接进行修改。StringBuilder是Java 5中引入的，它和StringBuffer的方法完全相同，区别在于它是在单线程环境下使用的，因为它的所有方面都没有被synchronized修饰，因此它的效率也比StringBuffer要高。
+String.intern()  当调用 intern 方法时，如果池已经包含一个等于此 String 对象的字符串（用 equals(Object) 方法确定），则返回池中的字符串。否则，将此 String 对象添加到池中，并返回此 String 对象的引用。 
+
+
+21,什么情况下用+运算符进行字符串连接比调用StringBuffer/StringBuilder对象的append方法连接字符串性能更好
+如果使用少量的字符串操作，使用 (+运算符)连接字符串；
+如果频繁的对大量字符串进行操作，则使用
+1)：全局变量或者需要多线程支持则使用StringBuffer；
+2)：局部变量或者单线程不涉及线程安全则使有StringBuilder。
+
+
