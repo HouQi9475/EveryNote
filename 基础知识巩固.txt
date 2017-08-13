@@ -1,4 +1,4 @@
-基础知识巩固
+﻿础知识巩固
 
 http://blog.csdn.net/jackfrued/article/details/44921941
 
@@ -70,7 +70,7 @@ wait是Object类的方法，对此对象调用wait方法导致本线程放弃对
 jvm中类的加载是由类加载器*(ClassLoader)和他的子类来实现的。java中的类加载器是一个重要的java运行时系统组件。他负责在运行时查找和装入类文件中的类。由于java的跨平台性，编译后的源文件并不是一个可运行的程序，而是一个或多个类文件。当java程序需要使用某个类时，JVM会确保这个类已经被加载，连接(验证，准备，解析)和初始化。类的加载是指把类的.class文件中的数据读到内存中，通常是创建一个字节数组读入.class文件，然后产生与所加载类对应的class对象。加载完成后，class类还不完整，所以class对象还不可用。当类被加载后就进去连接阶段，这一阶段包括验证，准备(为静态变量分配内存被设置默认的初始值)和解析(将符号引用替换为直接引用)三个步骤。最后JVM对类进行初始化。包括：1，如果类存在直接的父类并且这个父类还没有被初始化，那么先对父类进行初始化。2，如果类中有初始化语句，则依次执行这些初始化语句。类的加载是由类加载器完成的。
 
 16，抽象类（abstract class）和接口（interface）有什么异同？
-抽象类和接口都不能被实例化，但可以定义抽象类和接口类型的引用。一个类如果继承了抽象类或者实现了某个接口都需要对其中的抽象方法进行全部实现，否则该类仍得被声明为抽象类。接口比抽象类更加抽象。因为抽象类中可以定义构造器。可以由抽象方法和具体方法。而接口中不能定义构造器而且其中的方法全部为抽象方法。接口中的成员全部是public。抽象类中可以定义成员变量。而接口中的成员变量实际上都是常量。有抽象方法的类必须被声明为抽象类，而抽象类不一定有抽象方法。
+抽象类和接口都不能被实例化，但可以定义抽象类和接口类 型的引用。一个类如果继承了抽象类或者实现了某个接口都需要对其中的抽象方法进行全部实现，否则该类仍得被声明为抽象类。接口比抽象类更加抽象。因为抽象类中可以定义构造器。可以由抽象方法和具体方法。而接口中不能定义构造器而且其中的方法全部为抽象方法。接口中的成员全部是public。抽象类中可以定义成员变量。而接口中的成员变量实际上都是常量。有抽象方法的类必须被声明为抽象类，而抽象类不一定有抽象方法。
 
 17，Java 中会存在内存泄漏吗，请简单描述。
 理论上java存在垃圾回收机制(GC)，不会出现内存泄漏问题，然而在实际开发中，可能会存在无用但可达的对象，这些对象不会被GC回收，因此也会导致内存泄漏的发生。例如hibernate中的session(一级缓存)属于持久态对象，垃圾回收器是不会回收这些对象的。然而这些对象中可能存在无用的垃圾对象，如果不及时关闭或清空一级缓存就可能导致内存泄漏。
@@ -93,4 +93,72 @@ String.intern()  当调用 intern 方法时，如果池已经包含一个等于�
 1)：全局变量或者需要多线程支持则使用StringBuffer；
 2)：局部变量或者单线程不涉及线程安全则使有StringBuilder。
 
+22，日期和时间：
+- 如何取得年月日、小时分钟秒？
+public class DateTimeTest {
+    public static void main(String[] args) {
+        Calendar cal = Calendar.getInstance();
+        System.out.println(cal.get(Calendar.YEAR));
+        System.out.println(cal.get(Calendar.MONTH));    // 0 - 11
+        System.out.println(cal.get(Calendar.DATE));
+        System.out.println(cal.get(Calendar.HOUR_OF_DAY));
+        System.out.println(cal.get(Calendar.MINUTE));
+        System.out.println(cal.get(Calendar.SECOND));
 
+        // Java 8
+        LocalDateTime dt = LocalDateTime.now();
+        System.out.println(dt.getYear());
+        System.out.println(dt.getMonthValue());     // 1 - 12
+        System.out.println(dt.getDayOfMonth());
+        System.out.println(dt.getHour());
+        System.out.println(dt.getMinute());
+        System.out.println(dt.getSecond());
+    }
+}
+- 如何取得从1970年1月1日0时0分0秒到现在的毫秒数？
+        Long millis1=Calendar.getInstance().getTimeInMillis();
+        Long millis2=System.currentTimeMillis();
+        Long millis3=Clock.systemDefaultZone().millis(); // Java 8
+- 如何取得某月的最后一天？
+		Calendar time = Calendar.getInstance();
+		int dayodmonth=time.getActualMaximum(Calendar.DAY_OF_MONTH);
+		System.out.println(dayodmonth);
+- 如何格式化日期？
+		SimpleDateFormat oldFormatter = new SimpleDateFormat("yyyy-MM-dd");
+		Date date1 = new Date();
+		System.out.println(oldFormatter.format(date1));
+		// Java 8
+        DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        LocalDate date2 = LocalDate.now();
+        System.out.println(date2.format(newFormatter));
+23，打印昨天的当前时刻。
+		Calendar time = Calendar.getInstance();
+		time.add(Calendar.DATE, -1);
+		System.out.println(time.getTime());
+		// java 8
+		LocalDateTime today = LocalDateTime.now();
+		LocalDateTime yesterday = today.minusDays(1);
+		System.out.println(yesterday);
+
+24，Error和Exception有什么区别？
+Error表示系统级的错误和程序不必处理的异常，是 恢复不是不可能但很困难 的情况下的一种严重问题；比如内存溢出，不可能指望程序能处理这样的情况；Exception表示需要捕捉或者需要程序进行处理的异常，是一种设计或实现问题；也就是说，它表示如果程序运行正常，从不会发生的情况。
+
+25，try{}里有一个return语句，那么紧跟在这个try后的finally{}里的代码会不会被执行，什么时候被执行，在return前还是后?
+会执行，在方法返回调用者前执行。 
+在finally中改变返回值的做法是不好的，因为如果存在finally代码块，try中的return语句不会立马返回调用者，而是记录下返回值待finally代码块执行完毕之后再向调用者返回其值，然后如果在finally中修改了返回值，就会返回修改后的值。显然，在finally中返回或者修改返回值会对程序造成很大的困扰
+
+26，Java语言如何进行异常处理，关键字：throws、throw、try、catch、finally分别如何使用？
+java面向对象的方法进行异常处理，把各种不同的异常进行分类，并提供了良好的接口。在java中，每个异常都是一个对象，他是Throwable类或其子类的实例。当一个方法出现异常后便抛出一个异常对象，该对象中包含有异常信息，调用这个对象的方法可以捕获到这个异常并可以对其进行处理。java的异常处理是通过5个关键词来实现的：try,catch,throw,throws和finally.一般情况下是用try来执行一段程序，如果系统会抛出(throw)一个异常对象，可以通过它的类型来捕获(catch)它，或通过总是执行代码块(finally)来处理。try用来指定一块预防所有异常的程序，catch子句紧跟在try块后面，用来指定你想要捕获的异常的类型。throw语句用来明确地抛出一个异常。throws用来声明一个方法可能抛出的各种异常。finally为确保一段代码不管发生什么异常状况都要被执行。try语句可以嵌套，每当遇到一个try语句，异常的结构就会被放入异常栈中，直到所有的try语句都完成。如果下一级的try语句没有对某种异常进行处理，异常栈就会执行出栈操作，直到遇到有处理这种异常的try语句或者最终将异常抛给JVM.
+
+27，列出一些你常见的运行时异常？	
+ArithmeticException（算术异常）
+- ClassCastException （类转换异常）
+- IllegalArgumentException （非法参数异常）
+- IndexOutOfBoundsException （下标越界异常）
+- NullPointerException （空指针异常）
+- SecurityException （安全异常）
+
+28，阐述final、finally、finalize的区别。
+- final：修饰符（关键字）有三种用法：如果一个类被声明为final，意味着它不能再派生出新的子类，即不能被继承，因此它和abstract是反义词。将变量声明为final，可以保证它们在使用中不被改变，被声明为final的变量必须在声明时给定初值，而在以后的引用中只能读取不可修改。被声明为final的方法也同样只能使用，不能在子类中被重写。
+- finally：通常放在try…catch…的后面构造总是执行代码块，这就意味着程序无论正常执行还是发生异常，这里的代码只要JVM不关闭都能执行，可以将释放外部资源的代码写在finally块中。
+- finalize：Object类中定义的方法，Java中允许使用finalize()方法在垃圾收集器将对象从内存中清除出去之前做必要的清理工作。这个方法是由垃圾收集器在销毁对象时调用的，通过重写finalize()方法可以整理系统资源或者执行其他清理工作。
