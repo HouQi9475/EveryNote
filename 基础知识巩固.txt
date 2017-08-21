@@ -169,4 +169,64 @@ TreeSet要求存放的对象所属的类必须实现comparable接口，该接口
 30，Thread类的sleep()方法和对象的wait()方法都可以让线程暂停执行，它们有什么区别?
 sleep()方法（休眠）是线程类（Thread）的静态方法，调用此方法会让当前线程暂停执行指定的时间，将执行机会（CPU）让给其他线程，但是对象的锁依然保持，因此休眠时间结束后会自动恢复（线程回到就绪状态，请参考第66题中的线程状态转换图）。wait()是Object类的方法，调用对象的wait()方法导致当前线程放弃对象的锁（线程暂停执行），进入对象的等待池（wait pool），只有调用对象的notify()方法（或notifyAll()方法）时才能唤醒等待池中的线程进入等锁池（lock pool），如果线程重新获得对象的锁就可以进入就绪状态。
 
-31
+31，判断101-200之间有多少个素数，并输出所有素数。
+public class sushu {
+	public static void main(String[] args) {
+		for (int i = 2; i <= 200; i++) {
+			boolean flag = true;
+			for (int j = 2; j < i; j++) {
+				if (i % j == 0) {
+					flag = false;
+					break;
+				}
+			}
+			if (flag == true) {
+				System.out.print(" " + i);
+			}
+		}
+	}
+}
+
+32，打印出所有的 水仙花数 ，所谓 水仙花数 是指一个三位数，其各位数字立方和等于该数本身。
+
+public class shuixianhua {
+	public static void main(String args[]) {
+		math mymath = new math();
+		for (int i = 100; i <= 999; i++)
+			if (mymath.shuixianhua(i) == true)
+				System.out.println(i);
+	}
+}
+
+class math {
+	public boolean shuixianhua(int x) {
+		int i = 0, j = 0, k = 0;
+		i = x / 100;
+		j = (x % 100) / 10;
+		k = x % 10;
+		if (x == i * i * i + j * j * j + k * k * k)
+			return true;
+		else
+			return false;
+	}
+}
+
+
+33.将一个正整数分解质因数。例如：输入90,打印出90=2*3*3*5。 
+
+34.结果  AB:B
+public class Foo {
+	public static void main(String[] args) {
+		StringBuffer a = new StringBuffer("A");
+		StringBuffer b = new StringBuffer("B");
+		operate(a, b);
+		System.out.println(a + ":" + b);
+
+	}
+
+	private static void operate(StringBuffer a, StringBuffer b) {
+		// TODO Auto-generated method stub
+		a.append(b);
+		b = a;
+	}
+}
