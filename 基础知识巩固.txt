@@ -214,7 +214,7 @@ class math {
 
 33.将一个正整数分解质因数。例如：输入90,打印出90=2*3*3*5。 
 
-34.结果  AB:B
+34.面试题结果  AB:B
 public class Foo {
 	public static void main(String[] args) {
 		StringBuffer a = new StringBuffer("A");
