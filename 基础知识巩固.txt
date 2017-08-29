@@ -230,3 +230,131 @@ public class Foo {
 		b = a;
 	}
 }
+
+35，java中math类  正数：四舍五入  负数：五舍六入
+Math.round(11.5)   12
+Math.round(-11.5)  -11
+Math.round(-11.6)  -12
+
+Math.ceil(-11.5)  -11   ceil返回比小数大的最小整数
+Math.ceil(11.5)   12
+
+Math.floor(-11.5) -12   floor返回比小数小的最大整数
+Math.floor(11.5)  11
+
+Math.random 返回一个double类型的大于等于0.0小于1.0的值
+
+36.Thread的实现方式
+子类继承Thread类并重写run()方法
+通过.start()启动线程
+
+public class threadA extends Thread{
+    private int a;
+	public void run(){
+	   for(int i=0;i<100;i++){
+	      System.out.println(Thread.currentThread().getName()+":"+x);
+	      x++;
+	   }
+	}
+	public static void main(String args[]){
+	   threadA myThreadA=new threadA();
+	   myThreadA.start();
+
+	   threadA myThreadB=new threadB();
+	   myThreadB.start();
+	}
+}
+
+
+实现Runnable接口
+public class threadB implements Runnable{
+	private int a;
+	public void run(){
+	   for(int i=0;i<100;i++){
+	      System.out.println(Thread.currentThread().getName()+":"+x);
+	      x++;
+	   }
+	}
+	public static void main(String args[]){
+	   threadB myThreada=new threadB;
+	   threadB myThreadb=new threadB;
+
+	   new Thread(myThreada).start();
+	   new Thread(myThreadb).start();
+	}
+}
+
+37,sychronized方法
+public class method_synchronized implements Runnable{
+
+	private int a;
+	@Override
+	public void run() {
+       for(int i=0;i<200;i++){
+    	   System.out.println(Thread.currentThread().getName()+":"+a);
+    	   a++;
+       }
+	}
+
+	public static void main(String[] args) {
+		method_synchronized myThreadA=new method_synchronized();
+		new Thread(myThreadA).start();
+		new Thread(myThreadA).start();
+	}
+}
+上面代码执行时会出现两个线程同时输出1(数据共享).防止这种方法用到synchronized方法，在需要
+防止共享的代码块加该方法。如下
+public class method_synchronized implements Runnable{
+
+	private int a;
+	@Override
+	public void run() {
+       for(int i=0;i<200;i++){
+    	   synchronized (this) {  //括号中为对象，锁对象
+    		   System.out.println(Thread.currentThread().getName()+":"+a);
+        	   a++;
+		}
+       }
+	}
+
+	public static void main(String[] args) {
+		method_synchronized myThreadA=new method_synchronized();
+		new Thread(myThreadA).start();
+		new Thread(myThreadA).start();
+	}
+}
+
+
+38，join
+public class join implements Runnable{
+	private int a;
+
+	@Override
+	public void run() {
+		for(int i=0;i<100;i++){
+			synchronized(this){
+				System.out.println(Thread.currentThread().getName()+":"+a);
+				a++;
+				try {
+					Thread.currentThread().sleep(1000);  //睡眠1秒，让出时间片
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+		public static void main(String[] args){
+			join threadA=new join();
+			join threadB=new join();
+			Thread t1=new Thread(threadA);
+			Thread t2=new Thread(threadB);
+			t1.start();
+			try {
+				t1.join(5000);//5秒钟内占据时间片，优先执行。
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			t2.start();
+		}
+}
