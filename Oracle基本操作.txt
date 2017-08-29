@@ -1,0 +1,31 @@
+Oracle
+
+创建用户
+连接sys   conn  sys/123 as sysdba
+创建用户Ramon    create user Ramon identified by 1234 default tablespace test_tablespace temporory tablespace temptest_tablespace;
+查看数据库所有用户    select username from dba_users;
+给用户授权   grant connect to Ramon
+连接数据库   conn Ramon/1234
+修改密码     alter user Ramon identified by 4321
+将用户锁定   conn  sys/123 as sysdba(连接到管理员)
+             alter user Ramon account lock
+删除用户     drop user Ramon cascade (cascade级联，删除该用户所操作的所有数据)
+
+Oracle角色
+
+角色的作用： 把权限赋值给角色，把角色赋值给用户
+三种标准角色 ： CONNECT连接角色  只可以登陆，不可以和创建实体和数据库结构
+                RESOURCE资源角色   只可以创建实体不可以创建数据库结构
+                DBA数据库管理员   系统最高权限 只有DBA可以创建数据库结构
+给用户授权   grant connect to Ramon 可登录
+             grant resourse to Ramon  可建表,不能创建数据库结构(用户等) create table user(id number,name varchar2(20));
+             grant dba to Ramon 管理员权限 
+
+创建角色:   create role test_manager
+为角色赋予权限  grant 权限 to  角色
+                grant create table,create view to test_manager
+                grant test_manager to Ramon
+                revoke test_manager from Ramon (收回权限)
+                drop role test_manager (删除角色)
+
+
